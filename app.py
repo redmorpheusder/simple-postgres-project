@@ -1,6 +1,9 @@
 import os
 import psycopg2
 from psycopg2 import sql
+from fastapi import FastAPI
+
+app = FastAPI()
 
 # Database connection parameters (these will come from Railway's environment)
 DB_HOST = os.getenv('PGHOST', 'localhost')
@@ -24,31 +27,40 @@ def connect_to_db():
         print(f"Error connecting to the database: {e}")
         return None
 
-def create_table(conn):
-    try:
-        cur = conn.cursor()
-        cur.execute('''CREATE TABLE IF NOT EXISTS test_table (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(50),
-            age INT
-        );''')
-        conn.commit()
-        print("Table created")
-    except Exception as e:
-        print(f"Error creating table: {e}")
-
-def insert_data(conn, name, age):
-    try:
-        cur = conn.cursor()
-        cur.execute("INSERT INTO test_table (name, age) VALUES (%s, %s)", (name, age))
-        conn.commit()
-        print("Data inserted")
-    except Exception as e:
-        print(f"Error inserting data: {e}")
-
-if __name__ == "__main__":
+@app.post("/create_table")
+def create_table():
     conn = connect_to_db()
     if conn:
-        create_table(conn)
-        insert_data(conn, 'John Doe', 30)
-        conn.close()
+        try:
+            cur = conn.cursor()
+            cur.execute('''CREATE TABLE IF NOT EXISTS test_table (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(50),
+                age INT
+            );''')
+            conn.commit()
+            print("Table created")
+            return {"message": "Table created successfully"}
+        except Exception as e:
+            return {"error": str(e)}
+        finally:
+            conn.close()
+
+@app.post("/insert_data/")
+def insert_data(name: str, age: int):
+    conn = connect_to_db()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("INSERT INTO test_table (name, age) VALUES (%s, %s)", (name, age))
+            conn.commit()
+            print("Data inserted")
+            return {"message": "Data inserted successfully"}
+        except Exception as e:
+            return {"error": str(e)}
+        finally:
+            conn.close()
+
+@app.get("/")
+def root():
+    return {"message": "Welcome to the PostgreSQL FastAPI app!"}
