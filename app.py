@@ -61,6 +61,30 @@ def insert_data(name: str, age: int):
         finally:
             conn.close()
 
+
+# New GET endpoint to fetch all data from test_table
+@app.get("/get_data/")
+def get_data():
+    conn = connect_to_db()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM test_table;")
+            rows = cur.fetchall()
+            result = []
+            for row in rows:
+                result.append({
+                    "id": row[0],
+                    "name": row[1],
+                    "age": row[2]
+                })
+            return {"data": result}
+        except Exception as e:
+            return {"error": str(e)}
+        finally:
+            conn.close()
+
+
 @app.get("/")
 def root():
     return {"message": "Welcome to the PostgreSQL FastAPI app!"}
