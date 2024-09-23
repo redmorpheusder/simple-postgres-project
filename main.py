@@ -35,15 +35,15 @@ def create_table():
             cur = conn.cursor()
             cur.execute('''CREATE TABLE IF NOT EXISTS product_table (
                 id SERIAL PRIMARY KEY,
-                sku VARCHAR(50),
+                sku VARCHAR(255),
                 categories VARCHAR(255),
-                service_name TEXT,
-                manufacturer VARCHAR(100),
-                min_customer_price BIGINT,
-                avg_customer_price BIGINT,
-                max_customer_price BIGINT,
+                service_name VARCHAR(255),
+                manufacturer STRING,
+                min_customer_price INT,
+                avg_customer_price INT,
+                max_customer_price INT,
                 quantity INT,
-                city VARCHAR(50),
+                city VARCHAR(255),
                 url_key TEXT
             );''')
             conn.commit()
