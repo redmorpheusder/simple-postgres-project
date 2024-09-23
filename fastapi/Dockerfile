@@ -1,21 +1,21 @@
-# Use a slim Python image as the base
+# Используем Python image
 FROM python:3.11-slim
 
-# Set environment variables to prevent Python from writing pyc files and to buffer outputs
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Set the working directory in the container
+# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Copy the application files into the container
+# Копируем файлы приложения
 COPY . /app
 
-# Install dependencies directly into the container without a virtual environment
+# Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port that Railway will bind to dynamically
+# Открываем порт (уже не указываем конкретное значение, он будет динамическим через ENV)
 EXPOSE ${PORT}
 
-# Start the FastAPI app with Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+# Определяем команду в зависимости от переменной окружения TYPE и PORT
+CMD if [ "$TYPE" = "fast" ]; then \
+        uvicorn main:app --host 0.0.0.0 --port ${PORT}; \
+    else \
+        python app.py; \
+    fi
