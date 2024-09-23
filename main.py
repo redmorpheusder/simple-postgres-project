@@ -2,8 +2,22 @@ import os
 import psycopg2
 from psycopg2 import sql
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
+
+# Define Pydantic Model for Product Data
+class ProductData(BaseModel):
+    sku: str
+    categories: str
+    service_name: str
+    manufacturer: str
+    min_customer_price: int
+    avg_customer_price: int
+    max_customer_price: int
+    quantity: int
+    city: str
+    url_key: str
 
 # Database connection parameters (these will come from Railway's environment)
 DB_HOST = os.getenv('PGHOST', 'localhost')
@@ -38,7 +52,7 @@ def create_table():
                 sku VARCHAR(255),
                 categories VARCHAR(255),
                 service_name VARCHAR(255),
-                manufacturer STRING,
+                manufacturer VARCHAR(255),
                 min_customer_price INT,
                 avg_customer_price INT,
                 max_customer_price INT,
@@ -55,11 +69,7 @@ def create_table():
             conn.close()
 
 @app.post("/insert_data/")
-def insert_data(
-    sku: str, categories: str, service_name: str, manufacturer: str, 
-    min_customer_price: int, avg_customer_price: int, max_customer_price: int, 
-    quantity: int, city: str, url_key: str
-):
+def insert_data(product: ProductData):
     conn = connect_to_db()
     if conn:
         try:
@@ -70,8 +80,9 @@ def insert_data(
                 min_customer_price, avg_customer_price, max_customer_price, 
                 quantity, city, url_key)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (sku, categories, service_name, manufacturer, min_customer_price, 
-                  avg_customer_price, max_customer_price, quantity, city, url_key))
+            """, (product.sku, product.categories, product.service_name, product.manufacturer, 
+                  product.min_customer_price, product.avg_customer_price, product.max_customer_price, 
+                  product.quantity, product.city, product.url_key))
             conn.commit()
             print("Data inserted")
             return {"message": "Data inserted successfully"}
