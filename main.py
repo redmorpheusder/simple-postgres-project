@@ -68,7 +68,7 @@ def create_table():
         finally:
             conn.close()
 
-@app.post("/insert_data/")
+@app.post("/insert_data")
 def insert_data(product: ProductData):
     conn = connect_to_db()
     if conn:
@@ -84,14 +84,14 @@ def insert_data(product: ProductData):
                   product.min_customer_price, product.avg_customer_price, product.max_customer_price, 
                   product.quantity, product.city, product.url_key))
             conn.commit()
-            print("Data inserted")
+            print(f"Data inserted for SKU {product.sku}")
             return {"message": "Data inserted successfully"}
         except Exception as e:
             return {"error": str(e)}
         finally:
             conn.close()
 
-@app.get("/get_data/")
+@app.get("/get_data")
 def get_data():
     conn = connect_to_db()
     if conn:
