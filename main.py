@@ -33,10 +33,18 @@ def create_table():
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute('''CREATE TABLE IF NOT EXISTS test_table (
+            cur.execute('''CREATE TABLE IF NOT EXISTS product_table (
                 id SERIAL PRIMARY KEY,
-                name VARCHAR(50),
-                age INT
+                sku VARCHAR(50),
+                categories VARCHAR(255),
+                service_name TEXT,
+                manufacturer VARCHAR(100),
+                min_customer_price BIGINT,
+                avg_customer_price BIGINT,
+                max_customer_price BIGINT,
+                quantity INT,
+                city VARCHAR(50),
+                url_key TEXT
             );''')
             conn.commit()
             print("Table created")
@@ -47,12 +55,23 @@ def create_table():
             conn.close()
 
 @app.post("/insert_data/")
-def insert_data(name: str, age: int):
+def insert_data(
+    sku: str, categories: str, service_name: str, manufacturer: str, 
+    min_customer_price: int, avg_customer_price: int, max_customer_price: int, 
+    quantity: int, city: str, url_key: str
+):
     conn = connect_to_db()
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute("INSERT INTO test_table (name, age) VALUES (%s, %s)", (name, age))
+            cur.execute("""
+                INSERT INTO product_table 
+                (sku, categories, service_name, manufacturer, 
+                min_customer_price, avg_customer_price, max_customer_price, 
+                quantity, city, url_key)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (sku, categories, service_name, manufacturer, min_customer_price, 
+                  avg_customer_price, max_customer_price, quantity, city, url_key))
             conn.commit()
             print("Data inserted")
             return {"message": "Data inserted successfully"}
@@ -61,29 +80,34 @@ def insert_data(name: str, age: int):
         finally:
             conn.close()
 
-
-# New GET endpoint to fetch all data from test_table
 @app.get("/get_data/")
 def get_data():
     conn = connect_to_db()
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute("SELECT * FROM test_table;")
+            cur.execute("SELECT * FROM product_table;")
             rows = cur.fetchall()
             result = []
             for row in rows:
                 result.append({
                     "id": row[0],
-                    "name": row[1],
-                    "age": row[2]
+                    "sku": row[1],
+                    "categories": row[2],
+                    "service_name": row[3],
+                    "manufacturer": row[4],
+                    "min_customer_price": row[5],
+                    "avg_customer_price": row[6],
+                    "max_customer_price": row[7],
+                    "quantity": row[8],
+                    "city": row[9],
+                    "url_key": row[10]
                 })
             return {"data": result}
         except Exception as e:
             return {"error": str(e)}
         finally:
             conn.close()
-
 
 @app.get("/")
 def root():
