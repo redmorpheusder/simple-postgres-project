@@ -15,7 +15,7 @@ EXPOSE ${PORT}
 
 # Определяем команду в зависимости от переменной окружения TYPE и PORT
 CMD if [ "$TYPE" = "fast" ]; then \
-        uvicorn main:app --host 0.0.0.0 --port ${PORT}; \
+        uvicorn app:app --host 0.0.0.0 --port ${PORT}; \
     else \
         python app.py; \
     fi
